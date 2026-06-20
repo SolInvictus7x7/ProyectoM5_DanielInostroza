@@ -3,12 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import {
-  GET_REPO_TOOL_NAME,
-  GET_REPO_TOOL_DESCRIPTION,
-  GetRepoInputShape,
-  getRepoHandler,
-} from "./tools/get-repo.js";
+import { GET_REPO_TOOL_NAME, GET_REPO_TOOL_DESCRIPTION, GetRepoInputShape, getRepoHandler } from "./tools/get-repo.js";
 
 // ─── Create the MCP Server ─────────────────────────────────────────
 
