@@ -21,9 +21,10 @@
   "author": "Daniel Inostroza",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "@octokit/rest": "^22.0.1",
-    "zod": "^4.4.3"
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@octokit/rest": "22.0.1",
+    "dotenv": "^17.4.2",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
