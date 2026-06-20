@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { octokit } from "../client/github-client.js";
+import { octokit } from "../github/github-client.js";
+import { mapGitHubError } from "../github/errorMap.js";
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
@@ -44,9 +45,10 @@ export async function getRepoHandler(args: { owner: string; repo: string }) {
     const parsed = RepoOutputSchema.parse(data);
     return { content: [{ type: "text" as const, text: JSON.stringify(parsed, null, 2) }] };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    // Route all errors through the centralized mapper
+    const mapped = mapGitHubError(error, { owner: args.owner, repo: args.repo });
     return {
-      content: [{ type: "text" as const, text: `Error: ${args.owner}/${args.repo}: ${message}` }],
+      content: [{ type: "text" as const, text: JSON.stringify(mapped, null, 2) }],
       isError: true,
     };
   }
