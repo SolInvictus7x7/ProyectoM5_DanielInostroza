@@ -19,42 +19,53 @@ const server = new McpServer({
 
 // ─── Register Tools ─────────────────────────────────────────────────
 
-server.tool(
+// Register list-repo
+server.registerTool(
   LIST_REPO_TOOL_NAME,
-  LIST_REPO_TOOL_DESCRIPTION,
-  ListRepoInputShape,
+  {
+    description: LIST_REPO_TOOL_DESCRIPTION,
+    inputSchema: ListRepoInputShape,
+  },
   listRepoHandler
 );
 
-// Register list-issues: lists all open issues for a given owner/repo
-server.tool(
+// Register list-issues
+server.registerTool(
   LIST_ISSUES_TOOL_NAME,
-  LIST_ISSUES_TOOL_DESCRIPTION,
-  ListIssuesInputShape,
+  {
+    description: LIST_ISSUES_TOOL_DESCRIPTION,
+    inputSchema: ListIssuesInputShape,
+  },
   listIssuesHandler
 );
 
 // Register create-repo: creates a new repository for the authenticated user
-server.tool(
+server.registerTool(
   CREATE_REPO_TOOL_NAME,
-  CREATE_REPO_TOOL_DESCRIPTION,
-  CreateRepoInputShape,
+  {
+    description: CREATE_REPO_TOOL_DESCRIPTION,
+    inputSchema: CreateRepoInputShape,
+  },
   createRepoHandler
 );
 
 // Register create-issue: creates a new issue in a specific repo
-server.tool(
+server.registerTool(
   CREATE_ISSUE_TOOL_NAME,
-  CREATE_ISSUE_TOOL_DESCRIPTION,
-  CreateIssueInputShape,
+  {
+    description: CREATE_ISSUE_TOOL_DESCRIPTION,
+    inputSchema: CreateIssueInputShape,
+  },
   createIssueHandler
 );
 
 // Register create-commit: creates a commit with files directly via the Git API
-server.tool(
+server.registerTool(
   CREATE_COMMIT_TOOL_NAME,
-  CREATE_COMMIT_TOOL_DESCRIPTION,
-  CreateCommitInputShape,
+  {
+    description: CREATE_COMMIT_TOOL_DESCRIPTION,
+    inputSchema: CreateCommitInputShape,
+  },
   createCommitHandler
 );
 
