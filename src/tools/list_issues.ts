@@ -40,13 +40,10 @@ const CompactIssueSchema = z.object({
         .describe("Assignee logins."),
 });
 
-// Detailed DTO — full context for an AI agent working on the issue
+// Detailed DTO — spreads CompactIssueSchema and adds full context for an AI agent working on the issue
 const DetailedIssueSchema = z.object({
-    number: z.number().describe("Issue number."),
-    title: z.string().describe("Issue title."),
+    ...CompactIssueSchema.shape,
     body: z.string().nullable().transform((v) => v ?? "(no body)").describe("Issue body in markdown."),
-    state: z.string().describe("open or closed."),
-    html_url: z.string().url().describe("Browser URL to the issue."),
     user: z.object({
         login: z.string().describe("GitHub username."),
         html_url: z.string().url().describe("Profile URL."),
@@ -109,13 +106,15 @@ export async function listIssuesHandler(args: { owner: string; repo: string; inc
         const result = schema.safeParse(issuesOnly);
         if (!result.success) {
             return {
-                content: [{ type: "text" as const, text: JSON.stringify({
-                    isError: true,
-                    code: "SCHEMA_VALIDATION_ERROR",
-                    message: "GitHub response did not match the expected issue schema",
-                    hint: "This may indicate a GitHub API change — report this to the tool maintainer",
-                    details: result.error.message,
-                }, null, 2) }],
+                content: [{
+                    type: "text" as const, text: JSON.stringify({
+                        isError: true,
+                        code: "SCHEMA_VALIDATION_ERROR",
+                        message: "GitHub response did not match the expected issue schema",
+                        hint: "This may indicate a GitHub API change — report this to the tool maintainer",
+                        details: result.error.message,
+                    }, null, 2)
+                }],
                 isError: true,
             };
         }
