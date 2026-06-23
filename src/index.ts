@@ -3,11 +3,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import { LIST_REPO_TOOL_NAME, LIST_REPO_TOOL_DESCRIPTION, ListRepoInputShape, listRepoHandler } from "./tools/list_repo.js";
-import { LIST_ISSUES_TOOL_NAME, LIST_ISSUES_TOOL_DESCRIPTION, ListIssuesInputShape, listIssuesHandler } from "./tools/list_issues.js";
-import { CREATE_REPO_TOOL_NAME, CREATE_REPO_TOOL_DESCRIPTION, CreateRepoInputShape, createRepoHandler } from "./tools/create_repo.js";
-import { CREATE_ISSUE_TOOL_NAME, CREATE_ISSUE_TOOL_DESCRIPTION, CreateIssueInputShape, createIssueHandler } from "./tools/create_issue.js";
-import { CREATE_COMMIT_TOOL_NAME, CREATE_COMMIT_TOOL_DESCRIPTION, CreateCommitInputShape, createCommitHandler } from "./tools/create_commit.js";
+import { LIST_REPO_TOOL_NAME, LIST_REPO_TOOL_DESCRIPTION, listRepoHandler } from "./tools/list_repo.js";
+import { LIST_ISSUES_TOOL_NAME, LIST_ISSUES_TOOL_DESCRIPTION, listIssuesHandler } from "./tools/list_issues.js";
+import { CREATE_REPO_TOOL_NAME, CREATE_REPO_TOOL_DESCRIPTION, createRepoHandler } from "./tools/create_repo.js";
+import { CREATE_ISSUE_TOOL_NAME, CREATE_ISSUE_TOOL_DESCRIPTION, createIssueHandler } from "./tools/create_issue.js";
+import { CREATE_COMMIT_TOOL_NAME, CREATE_COMMIT_TOOL_DESCRIPTION, createCommitHandler } from "./tools/create_commit.js";
+import { ListRepoInputShape, ListIssuesInputShape, CreateRepoInputShape, CreateIssueInputShape, CreateCommitInputShape } from "./schemas/index.js";
 
 // ─── Create the MCP Server ─────────────────────────────────────────
 

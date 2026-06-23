@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { octokit } from "../github/github-client.js";
 import { mapGitHubError } from "../github/errorMap.js";
+import { CreateIssueOutputSchema } from "../schemas/index.js";
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
@@ -8,34 +8,6 @@ export const CREATE_ISSUE_TOOL_NAME = "create-issue";
 export const CREATE_ISSUE_TOOL_DESCRIPTION =
     "Create a new issue in a GitHub repository. " +
     "Returns a DTO with: number, title, state, html_url, body, user (login), labels (names), and assignees (logins).";
-
-export const CreateIssueInputShape = {
-    owner: z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Owner name can only contain alphanumeric characters, hyphens, underscores, and periods").describe("GitHub username or org that owns the repo."),
-    repo: z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("Repository name."),
-    title: z.string().min(1).describe("The title of the issue."),
-    body: z.string().optional().describe("The body/description of the issue in markdown."),
-    labels: z.array(z.string()).optional().describe("An array of label names to add to the issue."),
-    assignees: z.array(z.string()).optional().describe("An array of GitHub usernames to assign to the issue.")
-};
-
-// ═══ Output Schemas ═════════════════════════════════════════════════
-
-const IssueSchema = z.object({
-    number: z.number().describe("Issue number."),
-    title: z.string().describe("Issue title."),
-    state: z.string().describe("open or closed."),
-    html_url: z.string().url().describe("Browser URL to the issue."),
-    body: z.string().nullable().transform((v) => v ?? "(no body)").describe("Issue body in markdown."),
-    user: z.object({ login: z.string() }).nullable()
-        .transform((v) => v?.login ?? "(unknown)")
-        .describe("Author login."),
-    labels: z.array(z.union([z.string(), z.object({ name: z.string() })]))
-        .transform((arr) => arr.map((l) => (typeof l === "string" ? l : l.name)))
-        .describe("Label names."),
-    assignees: z.array(z.object({ login: z.string() })).nullable()
-        .transform((arr) => (arr ?? []).map((u) => u.login))
-        .describe("Assignee logins."),
-});
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
@@ -52,7 +24,7 @@ export async function createIssueHandler(args: { owner: string; repo: string; ti
             assignees: args.assignees,
         });
 
-        const result = IssueSchema.safeParse(data);
+        const result = CreateIssueOutputSchema.safeParse(data);
         if (!result.success) {
             return {
                 content: [{

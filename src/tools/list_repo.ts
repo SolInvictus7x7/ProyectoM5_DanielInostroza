@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { octokit } from "../github/github-client.js";
 import { mapGitHubError } from "../github/errorMap.js";
+import { ListRepoOutputSchema } from "../schemas/index.js";
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
@@ -11,25 +11,6 @@ export const LIST_REPO_TOOL_DESCRIPTION =
   "name (string), description (string), html_url (string), " +
   "stargazers_count (number), fork (boolean), language (string), " +
   "updated_at (ISO timestamp).";
-
-// Input schema — only a username is needed to list repos
-export const ListRepoInputShape = {
-  username: z.string().min(1).describe("GitHub username whose repos to list (e.g. 'octocat')."),
-};
-
-// Output schema — one item per repository; .parse() validates AND strips extra fields
-const RepoItemSchema = z.object({
-  name: z.string().describe("Repository name."),
-  description: z.string().nullable().transform((v) => v ?? "(no description)").describe("Repo summary."),
-  html_url: z.string().url().describe("Browser URL."),
-  stargazers_count: z.number().describe("Star count."),
-  fork: z.boolean().describe("Whether the repo is a fork."),
-  language: z.string().nullable().transform((v) => v ?? "(unknown)").describe("Primary language."),
-  updated_at: z.string().nullable().transform((v) => v ?? "(unknown)").describe("Last update timestamp."),
-});
-
-// The full output is an array of repo items
-export const ListRepoOutputSchema = z.array(RepoItemSchema);
 
 // ═══ Handler ════════════════════════════════════════════════════════
 

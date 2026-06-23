@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { octokit } from "../github/github-client.js";
 import { mapGitHubError } from "../github/errorMap.js";
+import { CreateRepoOutputSchema } from "../schemas/index.js";
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
@@ -9,26 +9,6 @@ export const CREATE_REPO_TOOL_NAME = "create-repo";
 export const CREATE_REPO_TOOL_DESCRIPTION =
     "Create a new repository for the authenticated GitHub user. " +
     "Returns a DTO with: name, full_name, html_url, description, private, and default_branch.";
-
-// Input schema
-export const CreateRepoInputShape = {
-    repo_name: z.string().min(3).max(100).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("The name of the new repository."),
-    description: z.string().describe("A short description of the repository."),
-    add_readme: z.boolean().default(false).describe("Whether to initialize the repository with a README.md file."),
-    private: z.boolean().optional().default(false).describe("Whether the repository is private."),
-    gitignore_template: z.string().optional().describe("Desired language or platform .gitignore template to apply.")
-};
-
-// ═══ Output Schemas ═════════════════════════════════════════════════
-
-const RepoSchema = z.object({
-    name: z.string().describe("The repository name."),
-    full_name: z.string().describe("The repository full name (e.g., owner/repo)."),
-    html_url: z.string().url().describe("Browser URL to the new repository."),
-    description: z.string().nullable().transform(v => v ?? "(no description)").describe("Repository description."),
-    private: z.boolean().describe("Whether the repository is private."),
-    default_branch: z.string().describe("The default branch of the repository.")
-});
 
 // Helper to normalize gitignore template names to match GitHub's case sensitivity
 function formatGitignoreTemplate(template: string): string {
@@ -59,7 +39,7 @@ export async function createRepoHandler(args: { repo_name: string; description: 
         });
 
         // safeParse instead of parse — graceful validation error
-        const result = RepoSchema.safeParse(data);
+        const result = CreateRepoOutputSchema.safeParse(data);
         if (!result.success) {
             return {
                 content: [{

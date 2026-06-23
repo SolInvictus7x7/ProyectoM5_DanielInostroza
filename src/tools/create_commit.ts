@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { octokit } from "../github/github-client.js";
 import { mapGitHubError } from "../github/errorMap.js";
+import { CreateCommitOutputSchema } from "../schemas/index.js";
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
@@ -9,24 +9,6 @@ export const CREATE_COMMIT_TOOL_DESCRIPTION =
     "Create a new commit in a GitHub repository using the Git Data API. " +
     "Allows committing multiple files simultaneously without needing a local clone. " +
     "Returns the new commit SHA and URL.";
-
-export const CreateCommitInputShape = {
-    owner: z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Owner name can only contain alphanumeric characters, hyphens, underscores, and periods").describe("GitHub username or org that owns the repo."),
-    repo: z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("Repository name."),
-    message: z.string().min(1).describe("The commit message."),
-    branch: z.string().default("main").describe("The branch to commit to (e.g., 'main' or 'master')."),
-    files: z.array(z.object({
-        path: z.string().describe("The file path inside the repo, e.g., 'src/index.js'"),
-        content: z.string().describe("The raw content of the file")
-    })).min(1).describe("An array of files to include in the commit.")
-};
-
-// ═══ Output Schemas ═════════════════════════════════════════════════
-
-const CommitSchema = z.object({
-    sha: z.string().describe("The new commit SHA."),
-    html_url: z.string().url().describe("The browser URL of the commit."),
-});
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
@@ -93,7 +75,7 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
         // Construct a direct HTML URL for convenience
         const html_url = `https://github.com/${args.owner}/${args.repo}/commit/${commitResp.data.sha}`;
 
-        const result = CommitSchema.safeParse({
+        const result = CreateCommitOutputSchema.safeParse({
             sha: commitResp.data.sha,
             html_url,
         });
