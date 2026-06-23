@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { LIST_REPO_TOOL_NAME, LIST_REPO_TOOL_DESCRIPTION, ListRepoInputShape, listRepoHandler } from "./tools/list_repo.js";
 import { LIST_ISSUES_TOOL_NAME, LIST_ISSUES_TOOL_DESCRIPTION, ListIssuesInputShape, listIssuesHandler } from "./tools/list_issues.js";
 import { CREATE_REPO_TOOL_NAME, CREATE_REPO_TOOL_DESCRIPTION, CreateRepoInputShape, createRepoHandler } from "./tools/create_repo.js";
+import { CREATE_ISSUE_TOOL_NAME, CREATE_ISSUE_TOOL_DESCRIPTION, CreateIssueInputShape, createIssueHandler } from "./tools/create_issue.js";
 
 // ─── Create the MCP Server ─────────────────────────────────────────
 
@@ -37,6 +38,14 @@ server.tool(
   CREATE_REPO_TOOL_DESCRIPTION,
   CreateRepoInputShape,
   createRepoHandler
+);
+
+// Register create-issue: creates a new issue in a specific repo
+server.tool(
+  CREATE_ISSUE_TOOL_NAME,
+  CREATE_ISSUE_TOOL_DESCRIPTION,
+  CreateIssueInputShape,
+  createIssueHandler
 );
 
 // ─── Connect via stdio transport ────────────────────────────────────
