@@ -7,6 +7,7 @@ import { LIST_REPO_TOOL_NAME, LIST_REPO_TOOL_DESCRIPTION, ListRepoInputShape, li
 import { LIST_ISSUES_TOOL_NAME, LIST_ISSUES_TOOL_DESCRIPTION, ListIssuesInputShape, listIssuesHandler } from "./tools/list_issues.js";
 import { CREATE_REPO_TOOL_NAME, CREATE_REPO_TOOL_DESCRIPTION, CreateRepoInputShape, createRepoHandler } from "./tools/create_repo.js";
 import { CREATE_ISSUE_TOOL_NAME, CREATE_ISSUE_TOOL_DESCRIPTION, CreateIssueInputShape, createIssueHandler } from "./tools/create_issue.js";
+import { CREATE_COMMIT_TOOL_NAME, CREATE_COMMIT_TOOL_DESCRIPTION, CreateCommitInputShape, createCommitHandler } from "./tools/create_commit.js";
 
 // ─── Create the MCP Server ─────────────────────────────────────────
 
@@ -46,6 +47,14 @@ server.tool(
   CREATE_ISSUE_TOOL_DESCRIPTION,
   CreateIssueInputShape,
   createIssueHandler
+);
+
+// Register create-commit: creates a commit with files directly via the Git API
+server.tool(
+  CREATE_COMMIT_TOOL_NAME,
+  CREATE_COMMIT_TOOL_DESCRIPTION,
+  CreateCommitInputShape,
+  createCommitHandler
 );
 
 // ─── Connect via stdio transport ────────────────────────────────────
