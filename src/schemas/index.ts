@@ -55,6 +55,25 @@ export const CreateCommitInputShape = {
     })).min(1).describe("An array of files to include in the commit.")
 };
 
+export const ListCommitsInputShape = {
+    owner: ownerSchema,
+    repo: repoSchema,
+    per_page: z.number().min(1).max(100).default(30).describe("Number of commits to return (max 100).")
+};
+
+export const AddCommentToIssueInputShape = {
+    owner: ownerSchema,
+    repo: repoSchema,
+    issue_number: z.number().min(1).describe("The number that identifies the issue."),
+    body: z.string().min(1).describe("The comment body in markdown.")
+};
+
+export const CloseIssueInputShape = {
+    owner: ownerSchema,
+    repo: repoSchema,
+    issue_number: z.number().min(1).describe("The number that identifies the issue to close.")
+};
+
 
 // ═══ Output Schemas ═══════════════════════════════════════════════════════
 
@@ -143,9 +162,38 @@ export const DetailedIssueSchema = CompactIssueSchema.extend({
 export const CompactOutputSchemaList = z.array(CompactIssueSchema);
 export const DetailedOutputSchemaList = z.array(DetailedIssueSchema);
 
+export const AddCommentToIssueOutputSchema = z.object({
+    id: z.number().describe("Comment ID."),
+    html_url: z.string().url().describe("Browser URL to the comment."),
+    body: z.string().nullable().transform(v => v ?? "(no body)").describe("Comment body in markdown."),
+    user: z.object({ login: z.string() }).nullable()
+        .transform((v) => v?.login ?? "(unknown)")
+        .describe("Author login."),
+});
+
+export const CloseIssueOutputSchema = z.object({
+    number: z.number().describe("Issue number."),
+    state: z.string().describe("State of the issue (should be 'closed')."),
+    html_url: z.string().url().describe("Browser URL to the closed issue."),
+});
+
 // --- Commits ---
 
 export const CreateCommitOutputSchema = z.object({
     sha: z.string().describe("The new commit SHA."),
     html_url: z.string().url().describe("The browser URL of the commit."),
 });
+
+const CommitItemSchema = z.object({
+    sha: z.string().describe("The commit SHA."),
+    html_url: z.string().url().describe("Browser URL of the commit."),
+    commit: z.object({
+        message: z.string().nullable().transform(v => v ?? "(no message)").describe("The commit message."),
+        author: z.object({
+            name: z.string().nullable().transform(v => v ?? "(unknown)"),
+            date: z.string().nullable().transform(v => v ?? "(unknown date)"),
+        }).nullable().transform(v => v ?? { name: "(unknown)", date: "(unknown date)" })
+    })
+});
+
+export const ListCommitsOutputSchemaList = z.array(CommitItemSchema);
