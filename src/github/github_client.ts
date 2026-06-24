@@ -2,8 +2,12 @@ import { Octokit } from "@octokit/rest";
 import { retry } from "@octokit/plugin-retry";
 import dotenv from "dotenv";
 import { logger } from "../utils/logger.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({ quiet: true });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../../.env"), quiet: true });
 
 const GITHUB_TOKEN = process.env["GITHUB_TOKEN"];
 

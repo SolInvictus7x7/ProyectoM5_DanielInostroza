@@ -23,9 +23,7 @@ export const ListIssuesInputShape = {
     ),
 };
 
-export const ListRepoInputShape = {
-    username: usernameSchema,
-};
+export const ListRepoInputShape = {};
 
 export const CreateRepoInputShape = {
     repo_name: createRepoNameSchema,
@@ -85,6 +83,7 @@ export const RepoItemSchema = z.object({
   html_url: z.string().url().describe("Browser URL."),
   stargazers_count: z.number().describe("Star count."),
   fork: z.boolean().describe("Whether the repo is a fork."),
+  private: z.boolean().describe("Whether the repo is private."),
   language: z.string().nullable().transform((v) => v ?? "(unknown)").describe("Primary language."),
   updated_at: z.string().nullable().transform((v) => v ?? "(unknown)").describe("Last update timestamp."),
 });
