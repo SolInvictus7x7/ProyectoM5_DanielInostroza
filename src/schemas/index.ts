@@ -2,15 +2,11 @@ import { z } from "zod";
 
 // ═══ Shared Input Fields ══════════════════════════════════════════════════
 
-// Note: Using standard GitHub allowed character regex: alphanumeric, hyphens, underscores, and periods
 export const ownerSchema = z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Owner name can only contain alphanumeric characters, hyphens, underscores, and periods").describe("GitHub username or org that owns the repo.");
 
 export const repoSchema = z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("Repository name.");
 
 export const usernameSchema = z.string().min(1).regex(/^[A-Za-z0-9._-]+$/, "Username can only contain alphanumeric characters, hyphens, underscores, and periods").describe("GitHub username.");
-
-// Repo name for creation has stricter length restrictions
-export const createRepoNameSchema = z.string().min(3).max(100).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("The name of the new repository.");
 
 // ═══ Input Shapes for Tools ═══════════════════════════════════════════════
 
@@ -26,7 +22,7 @@ export const ListIssuesInputShape = {
 export const ListRepoInputShape = {};
 
 export const CreateRepoInputShape = {
-    repo_name: createRepoNameSchema,
+    repo_name: z.string().min(3).max(100).regex(/^[A-Za-z0-9._-]+$/, "Repository names can only contain alphanumeric characters, hyphens, underscores, and periods").describe("The name of the new repository."),
     description: z.string().describe("A short description of the repository."),
     add_readme: z.boolean().default(false).describe("Whether to initialize the repository with a README.md file."),
     private: z.boolean().optional().default(false).describe("Whether the repository is private."),
@@ -117,12 +113,10 @@ export const CompactIssueSchema = z.object({
         .describe("Assignee logins."),
 });
 
-// Used by create_issue (compact + body)
 export const CreateIssueOutputSchema = CompactIssueSchema.extend({
     body: z.string().nullable().transform((v) => v ?? "(no body)").describe("Issue body in markdown."),
 });
 
-// Used by list_issues (detailed)
 export const DetailedIssueSchema = CompactIssueSchema.extend({
     body: z.string().nullable().transform((v) => v ?? "(no body)").describe("Issue body in markdown."),
     user: z.object({

@@ -13,8 +13,6 @@ export const CREATE_ISSUE_TOOL_DESCRIPTION =
 
 export async function createIssueHandler(args: { owner: string; repo: string; title: string; body?: string; labels?: string[]; assignees?: string[] }) {
     try {
-        // Direct call to create issue. If the repo doesn't exist, this naturally throws a 404
-        // which our global error mapper will beautifully catch and format.
         const { data } = await octokit.issues.create({
             owner: args.owner,
             repo: args.repo,
@@ -42,7 +40,6 @@ export async function createIssueHandler(args: { owner: string; repo: string; ti
 
         return { content: [{ type: "text" as const, text: JSON.stringify(result.data, null, 2) }] };
     } catch (error: unknown) {
-        // We rely entirely on our centralized mapping here, which gracefully handles 404s
         const mapped = mapGitHubError(error, { owner: args.owner, repo: args.repo });
         return {
             content: [{ type: "text" as const, text: JSON.stringify(mapped, null, 2) }],

@@ -1,12 +1,10 @@
 import { RequestError } from '@octokit/request-error';
 import { logger } from '../utils/logger.js';
 
-// Maps Octokit errors to structured MCP error objects with code, message, and hint
 export function mapGitHubError(
   err: unknown,
   context?: Record<string, unknown>
 ): { isError: true; code: string; message: string; hint: string; details?: unknown } {
-  // Log the raw error for local debugging without exposing it over stdout
   logger.error("GitHub operation failed", err);
 
   if (err instanceof RequestError) {
@@ -39,7 +37,6 @@ export function mapGitHubError(
         };
       }
       case 404: {
-        // Natural language translation as requested
         const target = context?.['repo'] ? `The repository ${String(context['owner'])}/${String(context['repo'])}` : 'The requested resource';
         return {
           isError: true,
@@ -70,7 +67,6 @@ export function mapGitHubError(
     }
   }
 
-  // Network/System errors outside of GitHub API responses
   const errorMessage = err instanceof Error ? err.message : 'Unknown network or system error';
   return {
     isError: true,

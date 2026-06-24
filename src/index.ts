@@ -32,7 +32,6 @@ const server = new McpServer({
 
 // ─── Register Tools ─────────────────────────────────────────────────
 
-// Register list-repo
 server.registerTool(
   LIST_REPO_TOOL_NAME,
   {
@@ -42,7 +41,6 @@ server.registerTool(
   listRepoHandler
 );
 
-// Register list-issues
 server.registerTool(
   LIST_ISSUES_TOOL_NAME,
   {
@@ -52,7 +50,6 @@ server.registerTool(
   listIssuesHandler
 );
 
-// Register create-repo: creates a new repository for the authenticated user
 server.registerTool(
   CREATE_REPO_TOOL_NAME,
   {
@@ -62,7 +59,6 @@ server.registerTool(
   createRepoHandler
 );
 
-// Register create-issue: creates a new issue in a specific repo
 server.registerTool(
   CREATE_ISSUE_TOOL_NAME,
   {
@@ -72,7 +68,6 @@ server.registerTool(
   createIssueHandler
 );
 
-// Register create-commit: creates a commit with files directly via the Git API
 server.registerTool(
   CREATE_COMMIT_TOOL_NAME,
   {
@@ -82,7 +77,6 @@ server.registerTool(
   createCommitHandler
 );
 
-// Register list-commits: lists recent commits for a repository
 server.registerTool(
   LIST_COMMITS_TOOL_NAME,
   {
@@ -92,7 +86,6 @@ server.registerTool(
   listCommitsHandler
 );
 
-// Register add-comment-to-issue: adds a comment to an existing issue
 server.registerTool(
   ADD_COMMENT_TOOL_NAME,
   {
@@ -102,7 +95,6 @@ server.registerTool(
   addCommentToIssueHandler
 );
 
-// Register close-issue: closes an existing issue
 server.registerTool(
   CLOSE_ISSUE_TOOL_NAME,
   {

@@ -14,7 +14,6 @@ export const CREATE_COMMIT_TOOL_DESCRIPTION =
 
 export async function createCommitHandler(args: { owner: string; repo: string; message: string; branch: string; files: { path: string; content: string }[] }) {
     try {
-        // 1. Get the current reference of the branch (what commit it currently points to)
         const refResp = await octokit.git.getRef({ 
             owner: args.owner, 
             repo: args.repo, 
@@ -22,7 +21,6 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
         });
         const baseCommitSha = refResp.data.object.sha;
 
-        // 2. Extract the base tree from the parent commit (the snapshot of the filesystem)
         const baseCommit = await octokit.git.getCommit({ 
             owner: args.owner, 
             repo: args.repo, 
@@ -30,24 +28,21 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
         });
         const baseTreeSha = baseCommit.data.tree.sha;
 
-        // 3. Create blobs for all the new files
         const treeItems = await Promise.all(args.files.map(async (file) => {
             const blobResp = await octokit.git.createBlob({
                 owner: args.owner,
                 repo: args.repo,
-                // Using Base64 encoding ensures safe handling of all characters
                 content: Buffer.from(file.content, "utf8").toString("base64"),
                 encoding: "base64",
             });
             return {
                 path: file.path,
-                mode: "100644" as const, // 100644 represents a normal file
+                mode: "100644" as const,
                 type: "blob" as const,
                 sha: blobResp.data.sha,
             };
         }));
 
-        // 4. Create a new tree with the new files layered on top of the base tree
         const newTreeResp = await octokit.git.createTree({
             owner: args.owner,
             repo: args.repo,
@@ -55,7 +50,6 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             base_tree: baseTreeSha,
         });
 
-        // 5. Create the new commit pointing to the new tree, keeping the history by linking the parent
         const commitResp = await octokit.git.createCommit({
             owner: args.owner,
             repo: args.repo,
@@ -64,7 +58,6 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             parents: [baseCommitSha],
         });
 
-        // 6. Update the branch reference to point to our newly created commit
         await octokit.git.updateRef({
             owner: args.owner,
             repo: args.repo,
@@ -72,7 +65,6 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             sha: commitResp.data.sha,
         });
 
-        // Construct a direct HTML URL for convenience
         const html_url = `https://github.com/${args.owner}/${args.repo}/commit/${commitResp.data.sha}`;
 
         const result = CreateCommitOutputSchema.safeParse({

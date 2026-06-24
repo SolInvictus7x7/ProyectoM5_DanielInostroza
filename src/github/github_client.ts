@@ -16,14 +16,13 @@ if (!GITHUB_TOKEN) {
   throw new Error("Token no encontrado");
 }
 
-// Create an Octokit instance that includes the retry plugin directly
 export const octokit: Octokit = new (Octokit.plugin(retry))({
   auth: GITHUB_TOKEN,
   userAgent: "GitHub API Client",
   baseUrl: "https://api.github.com",
   request: {
     retries: 3,
-    retryAfter: 1, // Fallback base retry time if not provided by GitHub headers
+    retryAfter: 1,
   },
   log: {
     debug: (message: string) => logger.debug(message),

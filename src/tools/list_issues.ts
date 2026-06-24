@@ -4,7 +4,6 @@ import { CompactOutputSchemaList, DetailedOutputSchemaList } from "../schemas/in
 
 // ═══ Contract ═══════════════════════════════════════════════════════
 
-// Tool metadata — tells the agent what this tool does and what fields it returns
 export const LIST_ISSUES_TOOL_NAME = "list-issues";
 export const LIST_ISSUES_TOOL_DESCRIPTION =
     "List open issues for a GitHub repository. " +
@@ -14,10 +13,8 @@ export const LIST_ISSUES_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-// Fetches open issues for a repo, maps through compact or detailed DTO, returns JSON
 export async function listIssuesHandler(args: { owner: string; repo: string; include_details: boolean }) {
     try {
-        // Call Octokit to list issues for the given repo
         const { data } = await octokit.issues.listForRepo({
             owner: args.owner,
             repo: args.repo,
@@ -27,13 +24,10 @@ export async function listIssuesHandler(args: { owner: string; repo: string; inc
             per_page: 30,
         });
 
-        // Filter out pull requests — GitHub's issues endpoint includes PRs, identified by pull_request key
         const issuesOnly = data.filter((item) => !item.pull_request);
 
-        // Pick the right schema based on the detail toggle
         const schema = args.include_details ? DetailedOutputSchemaList : CompactOutputSchemaList;
 
-        // safeParse instead of parse — graceful validation error instead of a throw
         const result = schema.safeParse(issuesOnly);
         if (!result.success) {
             return {
@@ -52,7 +46,6 @@ export async function listIssuesHandler(args: { owner: string; repo: string; inc
 
         return { content: [{ type: "text" as const, text: JSON.stringify(result.data, null, 2) }] };
     } catch (error: unknown) {
-        // Route all errors through the centralized mapper
         const mapped = mapGitHubError(error, { owner: args.owner, repo: args.repo });
         return {
             content: [{ type: "text" as const, text: JSON.stringify(mapped, null, 2) }],
