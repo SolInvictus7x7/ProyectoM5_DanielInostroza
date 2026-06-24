@@ -1,4 +1,4 @@
-import { octokit } from "../github/github-client.js";
+import { octokit } from "../github/github_client.js";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CompactOutputSchemaList, DetailedOutputSchemaList } from "../schemas/index.js";
 
