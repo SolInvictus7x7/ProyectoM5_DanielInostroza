@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CreateIssueOutputSchema } from "../schemas/index.js";
 
@@ -11,9 +11,10 @@ export const CREATE_ISSUE_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function createIssueHandler(args: { owner: string; repo: string; title: string; body?: string; labels?: string[]; assignees?: string[] }) {
+export function makecreateIssueHandler(deps: { octokit: Octokit }) {
+    return async function createIssueHandler(args: { owner: string; repo: string; title: string; body?: string; labels?: string[]; assignees?: string[] }) {
     try {
-        const { data } = await octokit.issues.create({
+        const { data } = await deps.octokit.issues.create({
             owner: args.owner,
             repo: args.repo,
             title: args.title,
@@ -46,4 +47,6 @@ export async function createIssueHandler(args: { owner: string; repo: string; ti
             isError: true,
         };
     }
+}
+
 }

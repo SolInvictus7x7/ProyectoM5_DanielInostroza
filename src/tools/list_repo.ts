@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { ListRepoOutputSchema } from "../schemas/index.js";
 
@@ -13,9 +13,10 @@ export const LIST_REPO_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function listRepoHandler(_args: unknown) {
+export function makelistRepoHandler(deps: { octokit: Octokit }) {
+    return async function listRepoHandler(_args: unknown) {
   try {
-    const { data } = await octokit.repos.listForAuthenticatedUser({
+    const { data } = await deps.octokit.repos.listForAuthenticatedUser({
       sort: "updated",
       per_page: 30,
     });
@@ -29,4 +30,6 @@ export async function listRepoHandler(_args: unknown) {
       isError: true,
     };
   }
+}
+
 }

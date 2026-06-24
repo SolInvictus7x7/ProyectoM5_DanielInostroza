@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CreateRepoOutputSchema } from "../schemas/index.js";
 
@@ -23,9 +23,10 @@ function formatGitignoreTemplate(template: string): string {
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function createRepoHandler(args: { repo_name: string; description: string; add_readme: boolean; private: boolean; gitignore_template?: string }) {
+export function makecreateRepoHandler(deps: { octokit: Octokit }) {
+    return async function createRepoHandler(args: { repo_name: string; description: string; add_readme: boolean; private: boolean; gitignore_template?: string }) {
     try {
-        const { data } = await octokit.repos.createForAuthenticatedUser({
+        const { data } = await deps.octokit.repos.createForAuthenticatedUser({
             name: args.repo_name,
             description: args.description,
             auto_init: args.add_readme,
@@ -57,4 +58,6 @@ export async function createRepoHandler(args: { repo_name: string; description: 
             isError: true,
         };
     }
+}
+
 }

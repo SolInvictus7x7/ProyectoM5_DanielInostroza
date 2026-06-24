@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CompactOutputSchemaList, DetailedOutputSchemaList } from "../schemas/index.js";
 
@@ -13,9 +13,10 @@ export const LIST_ISSUES_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function listIssuesHandler(args: { owner: string; repo: string; include_details: boolean }) {
+export function makelistIssuesHandler(deps: { octokit: Octokit }) {
+    return async function listIssuesHandler(args: { owner: string; repo: string; include_details: boolean }) {
     try {
-        const { data } = await octokit.issues.listForRepo({
+        const { data } = await deps.octokit.issues.listForRepo({
             owner: args.owner,
             repo: args.repo,
             state: "open",
@@ -52,4 +53,6 @@ export async function listIssuesHandler(args: { owner: string; repo: string; inc
             isError: true,
         };
     }
+}
+
 }

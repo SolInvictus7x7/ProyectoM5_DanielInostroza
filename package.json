@@ -11,7 +11,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "mcp",
@@ -26,6 +28,7 @@
     "@octokit/request-error": "^7.1.0",
     "@octokit/rest": "22.0.1",
     "dotenv": "^17.4.2",
+    "vitest": "^4.1.9",
     "zod": "4.4.3"
   },
   "devDependencies": {

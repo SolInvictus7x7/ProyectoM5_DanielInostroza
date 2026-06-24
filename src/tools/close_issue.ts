@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CloseIssueOutputSchema } from "../schemas/index.js";
 
@@ -11,9 +11,10 @@ export const CLOSE_ISSUE_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function closeIssueHandler(args: { owner: string; repo: string; issue_number: number }) {
+export function makecloseIssueHandler(deps: { octokit: Octokit }) {
+    return async function closeIssueHandler(args: { owner: string; repo: string; issue_number: number }) {
     try {
-        const { data } = await octokit.issues.update({
+        const { data } = await deps.octokit.issues.update({
             owner: args.owner,
             repo: args.repo,
             issue_number: args.issue_number,
@@ -46,4 +47,6 @@ export async function closeIssueHandler(args: { owner: string; repo: string; iss
             isError: true
         };
     }
+}
+
 }

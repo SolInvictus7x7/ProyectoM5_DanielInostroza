@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { ListCommitsOutputSchemaList } from "../schemas/index.js";
 
@@ -11,9 +11,10 @@ export const LIST_COMMITS_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function listCommitsHandler(args: { owner: string; repo: string; per_page: number }) {
+export function makelistCommitsHandler(deps: { octokit: Octokit }) {
+    return async function listCommitsHandler(args: { owner: string; repo: string; per_page: number }) {
     try {
-        const { data } = await octokit.repos.listCommits({
+        const { data } = await deps.octokit.repos.listCommits({
             owner: args.owner,
             repo: args.repo,
             per_page: args.per_page,
@@ -45,4 +46,6 @@ export async function listCommitsHandler(args: { owner: string; repo: string; pe
             isError: true
         };
     }
+}
+
 }

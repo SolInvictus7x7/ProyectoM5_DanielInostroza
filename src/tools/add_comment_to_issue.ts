@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { AddCommentToIssueOutputSchema } from "../schemas/index.js";
 
@@ -11,9 +11,10 @@ export const ADD_COMMENT_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function addCommentToIssueHandler(args: { owner: string; repo: string; issue_number: number; body: string }) {
+export function makeaddCommentToIssueHandler(deps: { octokit: Octokit }) {
+    return async function addCommentToIssueHandler(args: { owner: string; repo: string; issue_number: number; body: string }) {
     try {
-        const { data } = await octokit.issues.createComment({
+        const { data } = await deps.octokit.issues.createComment({
             owner: args.owner,
             repo: args.repo,
             issue_number: args.issue_number,
@@ -46,4 +47,6 @@ export async function addCommentToIssueHandler(args: { owner: string; repo: stri
             isError: true
         };
     }
+}
+
 }

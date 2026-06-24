@@ -1,4 +1,4 @@
-import { octokit } from "../github/github_client.js";
+import { Octokit } from "@octokit/rest";
 import { mapGitHubError } from "../github/errorMap.js";
 import { CreateCommitOutputSchema } from "../schemas/index.js";
 
@@ -12,16 +12,17 @@ export const CREATE_COMMIT_TOOL_DESCRIPTION =
 
 // ═══ Handler ════════════════════════════════════════════════════════
 
-export async function createCommitHandler(args: { owner: string; repo: string; message: string; branch: string; files: { path: string; content: string }[] }) {
+export function makecreateCommitHandler(deps: { octokit: Octokit }) {
+    return async function createCommitHandler(args: { owner: string; repo: string; message: string; branch: string; files: { path: string; content: string }[] }) {
     try {
-        const refResp = await octokit.git.getRef({ 
+        const refResp = await deps.octokit.git.getRef({ 
             owner: args.owner, 
             repo: args.repo, 
             ref: `heads/${args.branch}` 
         });
         const baseCommitSha = refResp.data.object.sha;
 
-        const baseCommit = await octokit.git.getCommit({ 
+        const baseCommit = await deps.octokit.git.getCommit({ 
             owner: args.owner, 
             repo: args.repo, 
             commit_sha: baseCommitSha 
@@ -29,7 +30,7 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
         const baseTreeSha = baseCommit.data.tree.sha;
 
         const treeItems = await Promise.all(args.files.map(async (file) => {
-            const blobResp = await octokit.git.createBlob({
+            const blobResp = await deps.octokit.git.createBlob({
                 owner: args.owner,
                 repo: args.repo,
                 content: Buffer.from(file.content, "utf8").toString("base64"),
@@ -43,14 +44,14 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             };
         }));
 
-        const newTreeResp = await octokit.git.createTree({
+        const newTreeResp = await deps.octokit.git.createTree({
             owner: args.owner,
             repo: args.repo,
             tree: treeItems,
             base_tree: baseTreeSha,
         });
 
-        const commitResp = await octokit.git.createCommit({
+        const commitResp = await deps.octokit.git.createCommit({
             owner: args.owner,
             repo: args.repo,
             message: args.message,
@@ -58,7 +59,7 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             parents: [baseCommitSha],
         });
 
-        await octokit.git.updateRef({
+        await deps.octokit.git.updateRef({
             owner: args.owner,
             repo: args.repo,
             ref: `heads/${args.branch}`,
@@ -96,4 +97,5 @@ export async function createCommitHandler(args: { owner: string; repo: string; m
             isError: true,
         };
     }
+}
 }
