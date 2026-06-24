@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { RequestError } from "@octokit/request-error";
+import { z } from "zod";
 
 export interface ToolTestConfig {
     toolName: string;
@@ -7,19 +8,28 @@ export interface ToolTestConfig {
     validArgs: any;
     octokitPath: string[];
     mockSuccessData: any;
+    outputSchema: z.ZodTypeAny;
+    schemaErrorCode: string;
+    expectedEndpoints?: string[];
+    expectedOutput?: any;
 }
 
-function buildFakeOctokit(path: string[], mockMethod: any) {
+function buildFakeOctokit(path: string[], mockMethod: any, calledEndpoints: string[]) {
     const proxyHandler: ProxyHandler<any> = {
         get(target: any, prop: string | symbol): any {
             if (prop === "then" || typeof prop === "symbol") return undefined;
             const currentPath = [...(target._path || []), prop];
             
             if (currentPath.join(".") === path.join(".")) {
-                return mockMethod;
+                return (...args: any[]) => {
+                    calledEndpoints.push(currentPath.join("."));
+                    if (typeof mockMethod === 'function') return mockMethod(...args);
+                    return mockMethod;
+                };
             }
             
             const fn: any = function() {
+                calledEndpoints.push(currentPath.join("."));
                 return Promise.resolve({ data: {
                     sha: "dummy-sha",
                     commit: { sha: "dummy-sha" },
@@ -38,14 +48,19 @@ function buildFakeOctokit(path: string[], mockMethod: any) {
 export function runStandardToolTests(config: ToolTestConfig) {
     describe(`${config.toolName} - Standard Handler Tests`, () => {
         it("successfully executes when GitHub API returns expected data", async () => {
-            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockResolvedValue({ data: config.mockSuccessData }));
+            const calledEndpoints: string[] = [];
+            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockResolvedValue({ data: config.mockSuccessData }), calledEndpoints);
             const handler = config.handlerFactory({ octokit: fakeOctokit });
             
             const response = await handler(config.validArgs);
             expect(response.isError).toBeFalsy();
             if (!response.isError && response.content) {
                 const parsed = JSON.parse(response.content[0].text);
-                expect(parsed).toBeDefined(); 
+                const expected = config.expectedOutput ?? config.outputSchema.parse(config.mockSuccessData);
+                expect(parsed).toEqual(expected);
+            }
+            if (config.expectedEndpoints) {
+                expect(calledEndpoints.sort()).toEqual([...config.expectedEndpoints].sort());
             }
         });
 
@@ -53,7 +68,7 @@ export function runStandardToolTests(config: ToolTestConfig) {
             const error401 = new RequestError("Unauthorized", 401, {
                 request: { method: "POST", url: "https://api.github.com/test", headers: {} }
             });
-            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockRejectedValue(error401));
+            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockRejectedValue(error401), []);
             const handler = config.handlerFactory({ octokit: fakeOctokit });
             
             const response = await handler(config.validArgs);
@@ -67,7 +82,7 @@ export function runStandardToolTests(config: ToolTestConfig) {
             const error404 = new RequestError("Not Found", 404, {
                 request: { method: "POST", url: "https://api.github.com/test", headers: {} }
             });
-            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockRejectedValue(error404));
+            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockRejectedValue(error404), []);
             const handler = config.handlerFactory({ octokit: fakeOctokit });
             
             const response = await handler(config.validArgs);
@@ -78,14 +93,14 @@ export function runStandardToolTests(config: ToolTestConfig) {
         });
 
         it("handles a schema validation error when GitHub returns unexpected data structure", async () => {
-            const badData = { absolutely_wrong_field: "yes" };
-            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockResolvedValue({ data: badData }));
+            const badData = Array.isArray(config.mockSuccessData) ? [{ absolutely_wrong_field: "yes" }] : { absolutely_wrong_field: "yes" };
+            const fakeOctokit = buildFakeOctokit(config.octokitPath, vi.fn().mockResolvedValue({ data: badData }), []);
             const handler = config.handlerFactory({ octokit: fakeOctokit });
             
             const response = await handler(config.validArgs);
             expect(response.isError).toBe(true);
             const parsed = JSON.parse(response.content[0].text);
-            expect(["SCHEMA_VALIDATION_ERROR", "ValidationError", "NetworkError"]).toContain(parsed.code);
+            expect(parsed.code).toBe(config.schemaErrorCode);
         });
     });
 }

@@ -21,8 +21,20 @@ export function makelistRepoHandler(deps: { octokit: Octokit }) {
       per_page: 30,
     });
 
-    const parsed = ListRepoOutputSchema.parse(data);
-    return { content: [{ type: "text" as const, text: JSON.stringify(parsed, null, 2) }] };
+        const result = ListRepoOutputSchema.safeParse(data);
+        if (!result.success) {
+            return {
+                content: [{ type: "text" as const, text: JSON.stringify({
+                    isError: true,
+                    code: "SCHEMA_VALIDATION_ERROR",
+                    message: "GitHub response did not match the expected repo list schema",
+                    hint: "This may indicate a GitHub API change — report this to the tool maintainer",
+                    details: result.error.message,
+                }, null, 2) }],
+                isError: true,
+            };
+        }
+        return { content: [{ type: "text" as const, text: JSON.stringify(result.data, null, 2) }] };
   } catch (error: unknown) {
     const mapped = mapGitHubError(error, {});
     return {

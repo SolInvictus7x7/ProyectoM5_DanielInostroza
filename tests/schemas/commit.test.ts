@@ -24,8 +24,8 @@ runSchemaTests("ListCommitsInput", z.object(ListCommitsInputShape), [
     },
     {
         name: "fails if per_page is out of bounds",
-        input: { owner: "acme", repo: "test", per_page: 150 }, // max 100
+        input: { owner: "acme", repo: "test", per_page: 150 },
         expectSuccess: false,
-        expectedErrors: [{ path: "per_page", match: /Too big/i }] // Zod default for max() is "Too big..."
+        expectedErrors: [{ path: "per_page", match: /Too big/i }]
     }
 ]);

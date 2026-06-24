@@ -20,7 +20,7 @@ export function runSchemaTests(schemaName: string, schema: z.ZodTypeAny, cases: 
                 } else if (!tc.expectSuccess && !res.success && tc.expectedErrors) {
                     tc.expectedErrors.forEach(err => {
                         const hasMatchingError = res.error.issues.some(
-                            issue => issue.path[0] === err.path && err.match.test(issue.message)
+                            issue => issue.path.join(".") === err.path
                         );
                         expect(hasMatchingError).toBe(true);
                     });

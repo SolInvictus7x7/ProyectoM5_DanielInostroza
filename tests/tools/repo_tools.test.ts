@@ -1,12 +1,16 @@
 import { runStandardToolTests } from "../utils/toolTester.js";
 import { makelistRepoHandler } from "../../src/tools/list_repo.js";
 import { makecreateRepoHandler } from "../../src/tools/create_repo.js";
+import { ListRepoOutputSchema, CreateRepoOutputSchema } from "../../src/schemas/index.js";
 
 runStandardToolTests({
     toolName: "list-repo",
     handlerFactory: makelistRepoHandler,
-    validArgs: {}, // list-repo takes no mandatory args
+    validArgs: {},
     octokitPath: ["repos", "listForAuthenticatedUser"],
+    expectedEndpoints: ["repos.listForAuthenticatedUser"],
+    outputSchema: ListRepoOutputSchema,
+    schemaErrorCode: "SCHEMA_VALIDATION_ERROR",
     mockSuccessData: [
         {
             name: "test-repo",
@@ -26,6 +30,9 @@ runStandardToolTests({
     handlerFactory: makecreateRepoHandler,
     validArgs: { repo_name: "new-repo", description: "testing", add_readme: true, private: false },
     octokitPath: ["repos", "createForAuthenticatedUser"],
+    expectedEndpoints: ["repos.createForAuthenticatedUser"],
+    outputSchema: CreateRepoOutputSchema,
+    schemaErrorCode: "SCHEMA_VALIDATION_ERROR",
     mockSuccessData: {
         name: "new-repo",
         full_name: "acme/new-repo",
